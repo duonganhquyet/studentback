@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="StudentAcademicManagement.Api/StudentAcademicManagement.Api.csproj" />
+  <Project Path="StudentAcademicManagement.Application/StudentAcademicManagement.Application.csproj" />
+  <Project Path="StudentAcademicManagement.Domain/StudentAcademicManagement.Domain.csproj" />
+  <Project Path="StudentAcademicManagement.Infrastructure/StudentAcademicManagement.Infrastructure.csproj" />
+</Solution>

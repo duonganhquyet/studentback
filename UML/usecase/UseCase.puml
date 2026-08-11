@@ -1,0 +1,109 @@
+@startuml
+
+left to right direction
+
+skinparam packageStyle rectangle
+skinparam shadowing false
+skinparam actorStyle stickman
+
+actor "Student" as Student
+actor "SchoolAdmin" as SchoolAdmin
+actor "SuperAdmin" as SuperAdmin
+
+rectangle "Student Academic Management System" {
+
+    package "Student" as StudentGroup {
+
+        usecase "Đăng nhập & Đổi mật khẩu" as ST01
+
+        usecase "Trích xuất thông tin tự động\n từ 2 mặt ảnh CCCD (OCR)" as ST02
+
+        usecase "Xác nhận dữ liệu &\nKhóa bảo vệ hồ sơ" as ST03
+
+        usecase "Khai báo thông tin cá nhân,\nliên lạc, gia đình, ngoại trú, THPT" as ST04
+
+        usecase "Tải lên & Thay đổi\nảnh thẻ (Avatar)" as ST05
+
+        usecase "Gửi yêu cầu xin sửa nhiều\ntrường dữ liệu (kèm lý do & xin mở khóa)" as ST06
+
+        usecase "Theo dõi trạng thái và lời nhắn\nphê duyệt yêu cầu xin sửa" as ST07
+
+        usecase "Tải lên, xem trước & quản lý\ntài liệu vật lý/bản sao" as ST08
+
+        usecase "Đăng ký hưởng diện đối tượng\nưu tiên / chính sách" as ST09
+
+        usecase "Tra cứu điểm & Đăng ký học lại /\nhọc cải thiện" as ST10
+    }
+
+
+    package "SchoolAdmin" as SchoolAdminGroup {
+
+        usecase "Xem danh sách & Phê duyệt /\nTừ chối yêu cầu xin sửa dữ liệu\nsinh viên (hiển thị MSSV)" as SA01
+
+        usecase "Tự động đồng bộ & ghi đè\nthông tin được duyệt vào hồ sơ sinh viên" as SA02
+
+        usecase "Quản lý danh sách sinh viên theo\nKhoa, Ngành, Lớp, Niên khóa" as SA03
+
+        usecase "Thay đổi trạng thái học vụ sinh viên\n(Đang học, Bảo lưu, Thôi học, Tốt nghiệp...)" as SA04
+
+        usecase "Thêm mới & Nhập danh sách sinh viên\ntheo lô (Excel/CSV)" as SA05
+
+        usecase "Kiểm tra, xem trước & Phê duyệt\ntài liệu/bản sao sinh viên nộp" as SA06
+
+        usecase "Phê duyệt đơn đăng ký\ndiện đối tượng chính sách" as SA07
+
+        usecase "Phê duyệt đơn đăng ký học lại /\nhọc cải thiện" as SA08
+    }
+
+
+    package "SuperAdmin" as SuperAdminGroup {
+
+        usecase "Quản lý danh sách các Trường học\n(Multi-tenancy)" as SU01
+
+        usecase "Khởi tạo & Cấp tài khoản\nQuản trị trường (SchoolAdmin)" as SU02
+
+        usecase "Xem Nhật ký hệ thống\n(Audit Logs) truy vết lịch sử thay đổi dữ liệu" as SU03
+    }
+}
+
+
+' ==============================
+' STUDENT
+' ==============================
+
+Student --> ST01
+Student --> ST02
+Student --> ST03
+Student --> ST04
+Student --> ST05
+Student --> ST06
+Student --> ST07
+Student --> ST08
+Student --> ST09
+Student --> ST10
+
+
+' ==============================
+' SCHOOL ADMIN
+' ==============================
+
+SchoolAdmin --> SA01
+SchoolAdmin --> SA02
+SchoolAdmin --> SA03
+SchoolAdmin --> SA04
+SchoolAdmin --> SA05
+SchoolAdmin --> SA06
+SchoolAdmin --> SA07
+SchoolAdmin --> SA08
+
+
+' ==============================
+' SUPER ADMIN
+' ==============================
+
+SuperAdmin --> SU01
+SuperAdmin --> SU02
+SuperAdmin --> SU03
+
+
+@enduml

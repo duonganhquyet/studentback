@@ -1,0 +1,26 @@
+## Ignore Visual Studio & .NET temporary files
+bin/
+obj/
+.vs/
+.vscode/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+## Ignore build output & publish folders
+/app/publish/
+publish/
+
+## Ignore uploaded files / media during runtime
+wwwroot/avatars/*
+!wwwroot/avatars/.gitkeep
+wwwroot/cccd/*
+!wwwroot/cccd/.gitkeep
+wwwroot/documents/*
+!wwwroot/documents/.gitkeep
+wwwroot/special_categories/*
+!wwwroot/special_categories/.gitkeep
+
+## Ignore appsettings secrets if needed
+appsettings.Development.json
