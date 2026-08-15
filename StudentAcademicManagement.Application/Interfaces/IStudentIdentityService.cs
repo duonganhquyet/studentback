@@ -7,6 +7,7 @@ namespace StudentAcademicManagement.Application.Interfaces
         Task<CccdComparisonResponse> UploadAndProcessCccdAsync(int userId, UploadCccdRequest request);
         Task ConfirmAndLockIdentityAsync(int userId, ConfirmCccdRequest request);
         Task<StudentIdentityResponse?> GetIdentityAsync(int userId);
+        Task<StudentIdentityResponse?> GetIdentityByStudentIdAsync(int schoolId, int studentId);
         Task<EditRequestResponse> CreateEditRequestAsync(int userId, CreateEditRequest request);
         Task<EditRequestResponse?> GetMyPendingEditRequestAsync(int userId);
         Task<IEnumerable<EditRequestResponse>> GetPendingEditRequestsAsync(int schoolId);
@@ -28,5 +29,6 @@ namespace StudentAcademicManagement.Application.Interfaces
         public bool IsLocked { get; set; }
         public string? FrontImageUrl { get; set; }
         public string? BackImageUrl { get; set; }
+        public string? Nationality { get; set; }
     }
 }

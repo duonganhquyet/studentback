@@ -9,6 +9,11 @@ namespace StudentAcademicManagement.Domain.Entities
         public string? Address { get; set; } // Địa chỉ thường trú
         public string? TemporaryAddress { get; set; } // Địa chỉ tạm trú (KT3/Phòng trọ)
 
+        // Thông tin ngoại trú
+        public string? ResidenceType { get; set; } // Hình thức cư trú
+        public string? LandlordName { get; set; } // Tên chủ nhà/quản lý
+        public string? LandlordPhone { get; set; } // SĐT chủ nhà/quản lý
+
         // Thông tin liên hệ khẩn cấp
         public string? GuardianName { get; set; }
         public string? GuardianPhoneNumber { get; set; }

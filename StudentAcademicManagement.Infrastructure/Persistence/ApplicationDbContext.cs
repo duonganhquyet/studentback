@@ -21,10 +21,12 @@ namespace StudentAcademicManagement.Infrastructure.Persistence
         public DbSet<SpecialCategory> SpecialCategories { get; set; }
         public DbSet<StudentSpecialCategory> StudentSpecialCategories { get; set; }
         public DbSet<StudentFamilyMember> FamilyMembers { get; set; }
+        public DbSet<StudentAcademicHistory> StudentAcademicHistories { get; set; }
+        public DbSet<StudentPaperRequest> StudentPaperRequests { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            base.OnModelCreating(modelBuilder);
+                
 
             // School Configuration
             modelBuilder.Entity<School>().HasIndex(s => s.SchoolCode).IsUnique();
@@ -114,6 +116,13 @@ namespace StudentAcademicManagement.Infrastructure.Persistence
                 .WithMany()
                 .HasForeignKey(ssc => ssc.SpecialCategoryId)
                 .OnDelete(DeleteBehavior.Restrict); // Không cho xóa Category nếu đang có Sinh viên đăng ký
+
+            // Paper Request Configuration
+            modelBuilder.Entity<StudentPaperRequest>()
+                .HasOne(pr => pr.Student)
+                .WithMany()
+                .HasForeignKey(pr => pr.StudentId)
+                .OnDelete(DeleteBehavior.Cascade);
 
             // ================= SEED DATA ================= //
             // Cố định mốc thời gian để tránh lỗi PendingModelChangesWarning khi Migration

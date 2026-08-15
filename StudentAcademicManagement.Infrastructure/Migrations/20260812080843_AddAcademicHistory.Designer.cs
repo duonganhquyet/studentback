@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using StudentAcademicManagement.Infrastructure.Persistence;
 
@@ -11,9 +12,11 @@ using StudentAcademicManagement.Infrastructure.Persistence;
 namespace StudentAcademicManagement.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260812080843_AddAcademicHistory")]
+    partial class AddAcademicHistory
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -556,48 +559,6 @@ namespace StudentAcademicManagement.Infrastructure.Migrations
                     b.ToTable("StudentIdentities");
                 });
 
-            modelBuilder.Entity("StudentAcademicManagement.Domain.Entities.StudentPaperRequest", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Note")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<string>("PaperType")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
-
-                    b.Property<string>("RejectionReason")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<int>("StudentId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("StudentId");
-
-                    b.ToTable("StudentPaperRequests");
-                });
-
             modelBuilder.Entity("StudentAcademicManagement.Domain.Entities.StudentProfile", b =>
                 {
                     b.Property<int>("Id")
@@ -851,17 +812,6 @@ namespace StudentAcademicManagement.Infrastructure.Migrations
                     b.HasOne("StudentAcademicManagement.Domain.Entities.Student", "Student")
                         .WithOne("Identity")
                         .HasForeignKey("StudentAcademicManagement.Domain.Entities.StudentIdentity", "StudentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Student");
-                });
-
-            modelBuilder.Entity("StudentAcademicManagement.Domain.Entities.StudentPaperRequest", b =>
-                {
-                    b.HasOne("StudentAcademicManagement.Domain.Entities.Student", "Student")
-                        .WithMany()
-                        .HasForeignKey("StudentId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

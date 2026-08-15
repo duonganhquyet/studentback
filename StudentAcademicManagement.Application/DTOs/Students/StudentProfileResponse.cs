@@ -19,5 +19,17 @@ namespace StudentAcademicManagement.Application.DTOs.Students
         public string MajorName { get; set; } = string.Empty;
         public string ClassName { get; set; } = string.Empty;
         public string AcademicStatus { get; set; } = string.Empty;
+
+        // Các hoạt động tham gia
+        public bool HasBeenClassMonitor { get; set; }
+        public bool HasBeenYouthUnionOfficer { get; set; }
+        public bool HasParticipatedInExcellentStudentTeam { get; set; }
+        public string? AwardDetails { get; set; }
+
+        // Trường hiện đang làm do Admin cấp
+        public string? CurrentRoleInSchool { get; set; }
+
+        // Lịch sử học tập
+        public List<AcademicHistoryDto> AcademicHistories { get; set; } = new List<AcademicHistoryDto>();
     }
 }

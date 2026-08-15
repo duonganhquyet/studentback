@@ -53,7 +53,7 @@ namespace StudentAcademicManagement.Api.Controllers
                     var student = await _context.Students.FirstOrDefaultAsync(s => s.UserId == userId);
                     if (student == null || student.Id != studentId)
                     {
-                        return Forbid("Bạn chỉ có quyền xem hồ sơ của chính mình.");
+                        return StatusCode(403, new { message = "Bạn chỉ có quyền xem hồ sơ của chính mình." });
                     }
                 }
 
@@ -91,7 +91,7 @@ namespace StudentAcademicManagement.Api.Controllers
                     var student = await _context.Students.FirstOrDefaultAsync(s => s.UserId == userId);
                     if (student == null || student.Id != studentId)
                     {
-                        return Forbid("Bạn chỉ có quyền chỉnh sửa hồ sơ của chính mình.");
+                        return StatusCode(403, new { message = "Bạn chỉ có quyền chỉnh sửa hồ sơ của chính mình." });
                     }
                 }
 

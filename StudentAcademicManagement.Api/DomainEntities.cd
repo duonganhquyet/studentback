@@ -1,0 +1,63 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="BaseEntity" Collapsed="true">
+    <Position X="5.5" Y="2.75" Width="1.5" />
+    <TypeIdentifier />
+  </Class>
+  <Class Name="StudentAcademicManagement.Domain.Entities.AuditLog">
+    <Position X="3.5" Y="0.75" Width="1.5" />
+    <TypeIdentifier />
+  </Class>
+  <Class Name="Role">
+    <Position X="2.5" Y="4.75" Width="1.5" />
+    <TypeIdentifier />
+  </Class>
+  <Class Name="School">
+    <Position X="4.5" Y="5" Width="1.5" />
+    <TypeIdentifier />
+  </Class>
+  <Class Name="StudentAcademicManagement.Domain.Entities.SpecialCategory">
+    <Position X="6.75" Y="5.25" Width="1.5" />
+    <TypeIdentifier />
+  </Class>
+  <Class Name="StudentAcademicManagement.Domain.Entities.Student">
+    <Position X="11.25" Y="4.5" Width="1.5" />
+    <TypeIdentifier />
+    <ShowAsAssociation>
+      <Property Name="Identity" />
+      <Property Name="Profile" />
+      <Property Name="Contact" />
+      <Property Name="User" />
+      <Property Name="School" />
+    </ShowAsAssociation>
+  </Class>
+  <Class Name="StudentAcademicManagement.Domain.Entities.StudentContact">
+    <Position X="0.5" Y="5" Width="1.5" />
+    <TypeIdentifier />
+  </Class>
+  <Class Name="StudentAcademicManagement.Domain.Entities.StudentDocument">
+    <Position X="0.5" Y="1.5" Width="1.5" />
+    <TypeIdentifier />
+  </Class>
+  <Class Name="StudentAcademicManagement.Domain.Entities.StudentFamilyMember">
+    <Position X="9.5" Y="0.5" Width="1.5" />
+    <TypeIdentifier />
+  </Class>
+  <Class Name="StudentAcademicManagement.Domain.Entities.StudentIdentity">
+    <Position X="7.5" Y="0.5" Width="1.5" />
+    <TypeIdentifier />
+  </Class>
+  <Class Name="StudentAcademicManagement.Domain.Entities.StudentProfile">
+    <Position X="9" Y="5.25" Width="1.5" />
+    <TypeIdentifier />
+  </Class>
+  <Class Name="StudentAcademicManagement.Domain.Entities.StudentSpecialCategory">
+    <Position X="11.5" Y="1.5" Width="1.5" />
+    <TypeIdentifier />
+  </Class>
+  <Class Name="User">
+    <Position X="13.75" Y="2.75" Width="1.5" />
+    <TypeIdentifier />
+  </Class>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>

@@ -2,6 +2,7 @@ namespace StudentAcademicManagement.Application.DTOs.Students
 {
     public class FamilyMemberDto
     {
+        public int Id { get; set; }
         public string FullName { get; set; } = string.Empty;
         public string Relationship { get; set; } = string.Empty;
         public string? Nationality { get; set; }
@@ -11,7 +12,7 @@ namespace StudentAcademicManagement.Application.DTOs.Students
         public string? Company { get; set; }
         public string? Ethnicity { get; set; }
         public string? Religion { get; set; }
-        public string? Phone { get; set; }
+        public string? PhoneNumber { get; set; }
         public string? PermanentAddress { get; set; }
         public string? CurrentAddress { get; set; }
         public bool IsEmergencyContact { get; set; }

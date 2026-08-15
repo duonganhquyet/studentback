@@ -6,6 +6,7 @@ using StudentAcademicManagement.Application.Interfaces;
 using StudentAcademicManagement.Infrastructure.Persistence;
 using StudentAcademicManagement.Infrastructure.Services;
 using System.Text;
+using StudentAcademicManagement.Domain.Entities;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -101,16 +102,23 @@ builder.Services.AddHttpContextAccessor();
 // Đăng ký Services cho Nghiệp vụ 3
 builder.Services.AddScoped<IFileStorageService, LocalFileStorageService>();
 builder.Services.AddScoped<ISchoolService, SchoolService>();
+
+// Email Queue & Background Sender (FIFO)
+builder.Services.AddSingleton<IEmailQueue, EmailQueue>();
 builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddHostedService<EmailBackgroundSender>();
+
 builder.Services.AddScoped<ISchoolAdminService, SchoolAdminService>();
 builder.Services.AddScoped<IStudentService, StudentService>();
 builder.Services.AddScoped<IStudentProfileService, StudentProfileService>();
 builder.Services.AddScoped<IStudentDocumentService, StudentDocumentService>();
 builder.Services.AddScoped<IOcrService, TesseractOcrService>();
+builder.Services.AddScoped<IStudentContactService, StudentContactService>();
 builder.Services.AddScoped<IStudentIdentityService, StudentIdentityService>();
 builder.Services.AddScoped<ISpecialCategoryService, SpecialCategoryService>();
 builder.Services.AddScoped<IAuditLogService, AuditLogService>();
 builder.Services.AddScoped<IDashboardService, DashboardService>();
+builder.Services.AddScoped<IPaperRequestService, PaperRequestService>();
 var app = builder.Build();
 
 // Tự động Migrate Database khi khởi chạy Server
@@ -118,6 +126,37 @@ using (var scope = app.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
     dbContext.Database.Migrate();
+
+    // Tự động làm sạch các bản ghi thông tin gia đình bị trùng lặp (giữ bản ghi mới nhất)
+    var familyMembers = dbContext.FamilyMembers.ToList();
+    var duplicatesToRemove = new List<StudentFamilyMember>();
+
+    var groupedByStudent = familyMembers.GroupBy(f => f.StudentId);
+    foreach (var group in groupedByStudent)
+    {
+        var uniqueMembers = new List<StudentFamilyMember>();
+        // Lấy bản ghi mới nhất trước (theo Id)
+        foreach (var m in group.OrderByDescending(f => f.Id))
+        {
+            if (!uniqueMembers.Any(u => 
+                u.FullName.Trim().Equals(m.FullName.Trim(), StringComparison.OrdinalIgnoreCase) ||
+                (!string.IsNullOrWhiteSpace(u.PhoneNumber) && !string.IsNullOrWhiteSpace(m.PhoneNumber) && u.PhoneNumber == m.PhoneNumber)))
+            {
+                uniqueMembers.Add(m);
+            }
+            else
+            {
+                duplicatesToRemove.Add(m);
+            }
+        }
+    }
+    
+    if (duplicatesToRemove.Any())
+    {
+        dbContext.FamilyMembers.RemoveRange(duplicatesToRemove);
+        dbContext.SaveChanges();
+        Console.WriteLine($"[Cleanup] Deleted {duplicatesToRemove.Count} duplicate family members.");
+    }
 }
 
 if (app.Environment.IsDevelopment())

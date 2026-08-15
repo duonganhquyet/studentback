@@ -38,6 +38,7 @@ namespace StudentAcademicManagement.Infrastructure.Services
                 throw new UnauthorizedAccessException("Tên đăng nhập hoặc mật khẩu không đúng.");
 
             string? studentCode = null;
+            int? studentId = null;
             if (user.Role.Name == "Student")
             {
                 var student = await _context.Students.FirstOrDefaultAsync(s => s.UserId == user.Id);
@@ -45,7 +46,13 @@ namespace StudentAcademicManagement.Infrastructure.Services
                 {
                     throw new UnauthorizedAccessException("Tài khoản Sinh viên chưa được đăng ký trong hệ thống.");
                 }
+                
+                if (student.AcademicStatus == "Thôi học")
+                {
+                    throw new UnauthorizedAccessException("Tài khoản đã bị khóa do sinh viên có trạng thái 'Thôi học'.");
+                }
                 studentCode = student.StudentCode;
+                studentId = student.Id;
             }
 
             if (!user.IsActive)
@@ -59,6 +66,7 @@ namespace StudentAcademicManagement.Infrastructure.Services
                 Email = user.Email,
                 Role = user.Role.Name,
                 StudentCode = studentCode,
+                StudentId = studentId,
                 SchoolId = user.SchoolId,
                 IsFirstLogin = user.IsFirstLogin
             };
@@ -107,6 +115,7 @@ namespace StudentAcademicManagement.Infrastructure.Services
                 {
                     claims.Add(new Claim("StudentCode", student.StudentCode));
                     claims.Add(new Claim("SchoolId", student.SchoolId.ToString()));
+                    claims.Add(new Claim("StudentId", student.Id.ToString())); // Added StudentId claim
                 }
             }
 

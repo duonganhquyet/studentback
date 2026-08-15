@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json;
 using StudentAcademicManagement.Application.DTOs.Students;
 using StudentAcademicManagement.Application.Interfaces;
 using StudentAcademicManagement.Domain.Entities;
@@ -64,6 +65,33 @@ namespace StudentAcademicManagement.Infrastructure.Services
                 student.Profile.Nationality = request.Nationality;
                 student.Profile.PlaceOfBirth = request.PlaceOfBirth;
                 student.Profile.UpdatedAt = DateTime.UtcNow;
+                student.Profile.HasBeenClassMonitor = request.HasBeenClassMonitor;
+                student.Profile.HasBeenYouthUnionOfficer = request.HasBeenYouthUnionOfficer;
+                student.Profile.HasParticipatedInExcellentStudentTeam = request.HasParticipatedInExcellentStudentTeam;
+                student.Profile.AwardDetails = request.AwardDetails;
+                student.Profile.CurrentRoleInSchool = request.CurrentRoleInSchool;
+
+                if (!string.IsNullOrEmpty(request.AcademicHistoriesJson))
+                {
+                    var histories = JsonSerializer.Deserialize<List<AcademicHistoryDto>>(request.AcademicHistoriesJson);
+                    if (histories != null)
+                    {
+                        var oldHistories = await _context.StudentAcademicHistories.Where(h => h.StudentId == student.Id).ToListAsync();
+                        _context.StudentAcademicHistories.RemoveRange(oldHistories);
+
+                        foreach (var h in histories)
+                        {
+                            _context.StudentAcademicHistories.Add(new StudentAcademicHistory
+                            {
+                                StudentId = student.Id,
+                                FromTime = h.FromTime,
+                                ToTime = h.ToTime,
+                                SchoolName = h.SchoolName,
+                                Notes = h.Notes
+                            });
+                        }
+                    }
+                }
 
                 await _context.SaveChangesAsync();
 
@@ -83,6 +111,33 @@ namespace StudentAcademicManagement.Infrastructure.Services
             student.Profile.Nationality = request.Nationality;
             student.Profile.PlaceOfBirth = request.PlaceOfBirth;
             student.Profile.UpdatedAt = DateTime.UtcNow;
+            student.Profile.HasBeenClassMonitor = request.HasBeenClassMonitor;
+            student.Profile.HasBeenYouthUnionOfficer = request.HasBeenYouthUnionOfficer;
+            student.Profile.HasParticipatedInExcellentStudentTeam = request.HasParticipatedInExcellentStudentTeam;
+            student.Profile.AwardDetails = request.AwardDetails;
+            student.Profile.CurrentRoleInSchool = request.CurrentRoleInSchool;
+
+            if (!string.IsNullOrEmpty(request.AcademicHistoriesJson))
+            {
+                var histories = JsonSerializer.Deserialize<List<AcademicHistoryDto>>(request.AcademicHistoriesJson);
+                if (histories != null)
+                {
+                    var oldHistories = await _context.StudentAcademicHistories.Where(h => h.StudentId == student.Id).ToListAsync();
+                    _context.StudentAcademicHistories.RemoveRange(oldHistories);
+
+                    foreach (var h in histories)
+                    {
+                        _context.StudentAcademicHistories.Add(new StudentAcademicHistory
+                        {
+                            StudentId = student.Id,
+                            FromTime = h.FromTime,
+                            ToTime = h.ToTime,
+                            SchoolName = h.SchoolName,
+                            Notes = h.Notes
+                        });
+                    }
+                }
+            }
 
             await _context.SaveChangesAsync();
 
@@ -107,7 +162,23 @@ namespace StudentAcademicManagement.Infrastructure.Services
                 FacultyName = student.FacultyName,
                 MajorName = student.MajorName,
                 ClassName = student.ClassName,
-                AcademicStatus = student.AcademicStatus
+                AcademicStatus = student.AcademicStatus,
+                HasBeenClassMonitor = student.Profile?.HasBeenClassMonitor ?? false,
+                HasBeenYouthUnionOfficer = student.Profile?.HasBeenYouthUnionOfficer ?? false,
+                HasParticipatedInExcellentStudentTeam = student.Profile?.HasParticipatedInExcellentStudentTeam ?? false,
+                AwardDetails = student.Profile?.AwardDetails,
+                CurrentRoleInSchool = student.Profile?.CurrentRoleInSchool,
+                AcademicHistories = _context.StudentAcademicHistories
+                    .Where(h => h.StudentId == student.Id)
+                    .Select(h => new AcademicHistoryDto
+                    {
+                        Id = h.Id,
+                        FromTime = h.FromTime,
+                        ToTime = h.ToTime,
+                        SchoolName = h.SchoolName,
+                        Notes = h.Notes
+                    })
+                    .ToList()
             };
         }
     }

@@ -94,6 +94,24 @@ namespace StudentAcademicManagement.Api.Controllers
         // ENDPOINTS DÀNH CHO QUẢN TRỊ TRƯỜNG HỌC (SCHOOL ADMIN)
         // =========================================================================
 
+        [HttpGet("{studentId}")]
+        [Authorize(Roles = "SchoolAdmin")]
+        public async Task<IActionResult> GetIdentityByStudentId(int studentId)
+        {
+            try
+            {
+                var schoolIdClaim = User.FindFirst("SchoolId")?.Value;
+                if (string.IsNullOrEmpty(schoolIdClaim) || !int.TryParse(schoolIdClaim, out int schoolId))
+                {
+                    return BadRequest(new { message = "Tài khoản của bạn chưa được liên kết với Trường học nào (SchoolId)." });
+                }
+                var result = await _identityService.GetIdentityByStudentIdAsync(schoolId, studentId);
+                if (result == null) return NotFound(new { message = "Không tìm thấy thông tin CCCD." });
+                return Ok(result);
+            }
+            catch (Exception ex) { return BadRequest(new { message = ex.Message }); }
+        }
+
         [HttpGet("edit-requests")]
         [Authorize(Roles = "SchoolAdmin")]
         public async Task<IActionResult> GetPendingEditRequests()
@@ -128,7 +146,7 @@ namespace StudentAcademicManagement.Api.Controllers
                 return NoContent();
             }
             catch (KeyNotFoundException ex) { return NotFound(new { message = ex.Message }); }
-            catch (UnauthorizedAccessException ex) { return Forbid(ex.Message); }
+            catch (UnauthorizedAccessException ex) { return StatusCode(403, new { message = ex.Message }); }
             catch (InvalidOperationException ex) { return BadRequest(new { message = ex.Message }); }
             catch (Exception ex) { return StatusCode(500, new { message = "Lỗi hệ thống.", details = ex.Message }); }
         }

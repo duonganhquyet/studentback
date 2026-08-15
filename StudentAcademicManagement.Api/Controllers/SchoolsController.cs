@@ -24,7 +24,7 @@ namespace StudentAcademicManagement.Api.Controllers
         {
             // Lấy SchoolId từ JWT Token
             var schoolIdClaim = User.FindFirst("SchoolId")?.Value;
-            if (string.IsNullOrEmpty(schoolIdClaim)) return Forbid();
+            if (string.IsNullOrEmpty(schoolIdClaim)) return StatusCode(403, new { message = "Forbidden" });
 
             var schoolId = int.Parse(schoolIdClaim);
             try

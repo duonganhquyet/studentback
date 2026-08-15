@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using StudentAcademicManagement.Infrastructure.Persistence;
 
@@ -11,9 +12,11 @@ using StudentAcademicManagement.Infrastructure.Persistence;
 namespace StudentAcademicManagement.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260812023545_UpdateIdentityModels")]
+    partial class UpdateIdentityModels
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -247,42 +250,6 @@ namespace StudentAcademicManagement.Infrastructure.Migrations
                     b.ToTable("Students");
                 });
 
-            modelBuilder.Entity("StudentAcademicManagement.Domain.Entities.StudentAcademicHistory", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("FromTime")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Notes")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("SchoolName")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("StudentId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("ToTime")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("StudentId");
-
-                    b.ToTable("StudentAcademicHistories");
-                });
-
             modelBuilder.Entity("StudentAcademicManagement.Domain.Entities.StudentContact", b =>
                 {
                     b.Property<int>("Id")
@@ -306,16 +273,7 @@ namespace StudentAcademicManagement.Infrastructure.Migrations
                     b.Property<string>("GuardianRelationship")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("LandlordName")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("LandlordPhone")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("PhoneNumber")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ResidenceType")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("StudentId")
@@ -556,48 +514,6 @@ namespace StudentAcademicManagement.Infrastructure.Migrations
                     b.ToTable("StudentIdentities");
                 });
 
-            modelBuilder.Entity("StudentAcademicManagement.Domain.Entities.StudentPaperRequest", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Note")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<string>("PaperType")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
-
-                    b.Property<string>("RejectionReason")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<int>("StudentId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("StudentId");
-
-                    b.ToTable("StudentPaperRequests");
-                });
-
             modelBuilder.Entity("StudentAcademicManagement.Domain.Entities.StudentProfile", b =>
                 {
                     b.Property<int>("Id")
@@ -609,14 +525,8 @@ namespace StudentAcademicManagement.Infrastructure.Migrations
                     b.Property<string>("AvatarUrl")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("AwardDetails")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
-
-                    b.Property<string>("CurrentRoleInSchool")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime?>("DateOfBirth")
                         .HasColumnType("datetime2");
@@ -630,15 +540,6 @@ namespace StudentAcademicManagement.Infrastructure.Migrations
 
                     b.Property<string>("Gender")
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("HasBeenClassMonitor")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("HasBeenYouthUnionOfficer")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("HasParticipatedInExcellentStudentTeam")
-                        .HasColumnType("bit");
 
                     b.Property<string>("Nationality")
                         .HasColumnType("nvarchar(max)");
@@ -791,17 +692,6 @@ namespace StudentAcademicManagement.Infrastructure.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("StudentAcademicManagement.Domain.Entities.StudentAcademicHistory", b =>
-                {
-                    b.HasOne("StudentAcademicManagement.Domain.Entities.Student", "Student")
-                        .WithMany()
-                        .HasForeignKey("StudentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Student");
-                });
-
             modelBuilder.Entity("StudentAcademicManagement.Domain.Entities.StudentContact", b =>
                 {
                     b.HasOne("StudentAcademicManagement.Domain.Entities.Student", "Student")
@@ -851,17 +741,6 @@ namespace StudentAcademicManagement.Infrastructure.Migrations
                     b.HasOne("StudentAcademicManagement.Domain.Entities.Student", "Student")
                         .WithOne("Identity")
                         .HasForeignKey("StudentAcademicManagement.Domain.Entities.StudentIdentity", "StudentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Student");
-                });
-
-            modelBuilder.Entity("StudentAcademicManagement.Domain.Entities.StudentPaperRequest", b =>
-                {
-                    b.HasOne("StudentAcademicManagement.Domain.Entities.Student", "Student")
-                        .WithMany()
-                        .HasForeignKey("StudentId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

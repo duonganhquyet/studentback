@@ -28,7 +28,7 @@ namespace StudentAcademicManagement.Api.Controllers
                 var response = await _documentService.UploadDocumentAsync(userId, request);
                 return StatusCode(201, response);
             }
-            catch (UnauthorizedAccessException ex) { return Forbid(ex.Message); }
+            catch (UnauthorizedAccessException ex) { return StatusCode(403, new { message = ex.Message }); }
         }
 
         [HttpGet("my")]
@@ -41,7 +41,7 @@ namespace StudentAcademicManagement.Api.Controllers
                 var docs = await _documentService.GetMyDocumentsAsync(userId);
                 return Ok(docs);
             }
-            catch (UnauthorizedAccessException ex) { return Forbid(ex.Message); }
+            catch (UnauthorizedAccessException ex) { return StatusCode(403, new { message = ex.Message }); }
         }
 
         [HttpDelete("my/{id}")]
@@ -54,7 +54,7 @@ namespace StudentAcademicManagement.Api.Controllers
                 await _documentService.DeleteMyDocumentAsync(userId, id);
                 return NoContent();
             }
-            catch (UnauthorizedAccessException ex) { return Forbid(ex.Message); }
+            catch (UnauthorizedAccessException ex) { return StatusCode(403, new { message = ex.Message }); }
             catch (InvalidOperationException ex) { return BadRequest(new { message = ex.Message }); }
             catch (KeyNotFoundException ex) { return NotFound(new { message = ex.Message }); }
             catch (Exception ex) { return StatusCode(500, new { message = ex.Message }); }

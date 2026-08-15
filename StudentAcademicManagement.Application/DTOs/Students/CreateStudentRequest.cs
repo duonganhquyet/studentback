@@ -23,5 +23,24 @@ namespace StudentAcademicManagement.Application.DTOs.Students
 
         [Required(ErrorMessage = "Tên Lớp quản lý là bắt buộc")]
         public string ClassName { get; set; } = string.Empty;
+
+        // Expanded Profile & Identity Information
+        [Required(ErrorMessage = "Họ và tên là bắt buộc")]
+        public string FullName { get; set; } = string.Empty;
+
+        public DateTime? DateOfBirth { get; set; }
+
+        public string Gender { get; set; } = "Nam"; // Nam, Nữ, Khác
+
+        // [Required(ErrorMessage = "Số CCCD là bắt buộc")]
+        public string IdNumber { get; set; } = string.Empty;
+
+        public DateTime? IssueDate { get; set; }
+        public string IssuePlace { get; set; } = string.Empty;
+
+        // Regional Info
+        public string Province { get; set; } = string.Empty;
+        public string Ward { get; set; } = string.Empty;
+        public string RegionType { get; set; } = string.Empty;
     }
 }

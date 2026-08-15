@@ -47,7 +47,36 @@ namespace StudentAcademicManagement.Infrastructure.Services
                 VerificationStatus = student.Identity?.VerificationStatus ?? "Unverified",
                 IsLocked = student.Identity?.IsLocked ?? false,
                 FrontImageUrl = student.Identity?.FrontImageUrl,
-                BackImageUrl = student.Identity?.BackImageUrl
+                BackImageUrl = student.Identity?.BackImageUrl,
+                Nationality = student.Identity?.Nationality ?? student.Profile?.Nationality
+            };
+        }
+
+        public async Task<StudentIdentityResponse?> GetIdentityByStudentIdAsync(int schoolId, int studentId)
+        {
+            var student = await _context.Students
+                .Include(s => s.Profile)
+                .Include(s => s.Identity)
+                .FirstOrDefaultAsync(s => s.Id == studentId && s.SchoolId == schoolId);
+
+            if (student == null) return null;
+
+            return new StudentIdentityResponse
+            {
+                StudentCode = student.StudentCode,
+                IdNumber = student.Identity?.IdNumber,
+                FullName = student.Identity?.FullName ?? student.Profile?.FullName,
+                DateOfBirth = student.Identity?.DateOfBirth ?? student.Profile?.DateOfBirth,
+                Gender = student.Identity?.Gender ?? student.Profile?.Gender,
+                PlaceOfOrigin = student.Identity?.PlaceOfOrigin,
+                PlaceOfResidence = student.Identity?.PlaceOfResidence,
+                IssueDate = student.Identity?.IssueDate,
+                IssuePlace = student.Identity?.IssuePlace,
+                VerificationStatus = student.Identity?.VerificationStatus ?? "Unverified",
+                IsLocked = student.Identity?.IsLocked ?? false,
+                FrontImageUrl = student.Identity?.FrontImageUrl,
+                BackImageUrl = student.Identity?.BackImageUrl,
+                Nationality = student.Identity?.Nationality ?? student.Profile?.Nationality
             };
         }
 
@@ -143,11 +172,18 @@ namespace StudentAcademicManagement.Infrastructure.Services
 
             if (student.Identity.IsLocked) throw new InvalidOperationException("Hồ sơ này đã bị khóa dữ liệu từ trước.");
 
+            if (!string.IsNullOrWhiteSpace(request.IdNumber))
+            {
+                if (await _context.StudentIdentities.AnyAsync(i => i.IdNumber == request.IdNumber && i.StudentId != student.Id))
+                    throw new InvalidOperationException($"Số căn cước công dân (CCCD) {request.IdNumber} đã được sử dụng bởi một sinh viên khác.");
+            }
+
             // 1. Cập nhật Identity chuẩn
             student.Identity.IdNumber = request.IdNumber;
             student.Identity.FullName = request.FullName;
             student.Identity.DateOfBirth = request.Dob;
             student.Identity.Gender = request.Gender;
+            student.Identity.PlaceOfOrigin = request.PlaceOfOrigin;
             student.Identity.PlaceOfResidence = request.Address;
             student.Identity.IssueDate = request.IssueDate;
             student.Identity.IssuePlace = request.IssuePlace;
@@ -156,33 +192,90 @@ namespace StudentAcademicManagement.Infrastructure.Services
             // 1.5 Lưu danh sách gia đình
             if (request.FamilyMembers != null && request.FamilyMembers.Any())
             {
-                foreach (var m in request.FamilyMembers)
+                var existingMembers = await _context.FamilyMembers.Where(f => f.StudentId == student.Id).ToListAsync();
+
+                // Lọc trùng tên hoặc số điện thoại trong request (giữ bản ghi cuối/mới nhất)
+                var uniqueNewMembers = new List<FamilyMemberDto>();
+                foreach (var m in request.FamilyMembers.Where(x => !string.IsNullOrWhiteSpace(x.FullName)).Reverse())
                 {
-                    _context.FamilyMembers.Add(new StudentFamilyMember
+                    if (!uniqueNewMembers.Any(u =>
+                        u.FullName.Trim().Equals(m.FullName.Trim(), StringComparison.OrdinalIgnoreCase) ||
+                        (!string.IsNullOrWhiteSpace(u.PhoneNumber) && !string.IsNullOrWhiteSpace(m.PhoneNumber) && u.PhoneNumber == m.PhoneNumber)))
                     {
-                        StudentId = student.Id,
-                        FullName = m.FullName,
-                        Relationship = m.Relationship,
-                        Nationality = m.Nationality,
-                        BirthYear = m.BirthYear,
-                        Job = m.Job,
-                        Position = m.Position,
-                        Company = m.Company,
-                        Ethnicity = m.Ethnicity,
-                        Religion = m.Religion,
-                        PhoneNumber = m.Phone,
-                        PermanentAddress = m.PermanentAddress,
-                        CurrentAddress = m.CurrentAddress,
-                        IsEmergencyContact = m.IsEmergencyContact,
-                        IsAlumni = m.IsAlumni
-                    });
+                        uniqueNewMembers.Add(m);
+                    }
+                }
+                uniqueNewMembers.Reverse();
+
+                // Xóa những người cũ không còn trong danh sách gửi lên
+                var namesToKeep = uniqueNewMembers.Select(m => m.FullName.Trim().ToLower()).ToList();
+                var phonesToKeep = uniqueNewMembers.Where(m => !string.IsNullOrWhiteSpace(m.PhoneNumber)).Select(m => m.PhoneNumber).ToList();
+                var membersToRemove = existingMembers.Where(e =>
+                    !namesToKeep.Contains(e.FullName.Trim().ToLower()) &&
+                    (string.IsNullOrWhiteSpace(e.PhoneNumber) || !phonesToKeep.Contains(e.PhoneNumber))
+                ).ToList();
+                _context.FamilyMembers.RemoveRange(membersToRemove);
+
+                foreach (var m in uniqueNewMembers)
+                {
+                    var existings = existingMembers.Where(e =>
+                        e.FullName.Trim().Equals(m.FullName.Trim(), StringComparison.OrdinalIgnoreCase) ||
+                        (!string.IsNullOrWhiteSpace(e.PhoneNumber) && !string.IsNullOrWhiteSpace(m.PhoneNumber) && e.PhoneNumber == m.PhoneNumber)
+                    ).ToList();
+                    
+                    if (existings.Any())
+                    {
+                        var existing = existings.First();
+                        // Cập nhật người cũ
+                        existing.Relationship = m.Relationship ?? string.Empty;
+                        existing.Nationality = m.Nationality;
+                        existing.BirthYear = m.BirthYear;
+                        existing.Job = m.Job;
+                        existing.Position = m.Position;
+                        existing.Company = m.Company;
+                        existing.Ethnicity = m.Ethnicity;
+                        existing.Religion = m.Religion;
+                        existing.PhoneNumber = m.PhoneNumber;
+                        existing.PermanentAddress = m.PermanentAddress;
+                        existing.CurrentAddress = m.CurrentAddress;
+                        existing.IsEmergencyContact = m.IsEmergencyContact;
+                        existing.IsAlumni = m.IsAlumni;
+
+                        // Xóa các bản duplicate bị dư thừa trong DB cũ
+                        if (existings.Count > 1)
+                        {
+                            _context.FamilyMembers.RemoveRange(existings.Skip(1));
+                        }
+                    }
+                    else
+                    {
+                        // Thêm người mới
+                        _context.FamilyMembers.Add(new StudentFamilyMember
+                        {
+                            StudentId = student.Id,
+                            FullName = m.FullName.Trim(),
+                            Relationship = m.Relationship ?? string.Empty,
+                            Nationality = m.Nationality,
+                            BirthYear = m.BirthYear,
+                            Job = m.Job,
+                            Position = m.Position,
+                            Company = m.Company,
+                            Ethnicity = m.Ethnicity,
+                            Religion = m.Religion,
+                            PhoneNumber = m.PhoneNumber,
+                            PermanentAddress = m.PermanentAddress,
+                            CurrentAddress = m.CurrentAddress,
+                            IsEmergencyContact = m.IsEmergencyContact,
+                            IsAlumni = m.IsAlumni
+                        });
+                    }
                 }
             }
 
             // Lệnh Khóa bảo vệ
             student.Identity.IsLocked = true;
 
-            // 2. Đồng bộ dữ liệu sang Profile của sinh viên
+            // Đồng bộ dữ liệu sang Profile của sinh viên
             if (student.Profile == null)
             {
                 student.Profile = new StudentProfile { StudentId = student.Id };
@@ -191,8 +284,23 @@ namespace StudentAcademicManagement.Infrastructure.Services
             student.Profile.FullName = request.FullName;
             student.Profile.DateOfBirth = request.Dob;
             student.Profile.Gender = request.Gender;
+            student.Profile.PlaceOfBirth = request.PlaceOfOrigin;
+
+            await LogAuditAsync(userId, "STUDENT_CONFIRM_IDENTITY", $"Sinh viên xác nhận & Khóa hồ sơ (Tự động cập nhật Profile theo OCR): {request.IdNumber}");
 
             await _context.SaveChangesAsync();
+        }
+
+        private async Task LogAuditAsync(int userId, string action, string details)
+        {
+            _context.AuditLogs.Add(new AuditLog
+            {
+                UserId = userId,
+                Action = action,
+                NewValue = details,
+                IpAddress = "127.0.0.1",
+                CreatedAt = DateTime.UtcNow
+            });
         }
 
         // =========================================================================
@@ -326,6 +434,25 @@ namespace StudentAcademicManagement.Infrastructure.Services
 
                 // Tự động giải mã & ghi đè tất cả các trường dữ liệu được yêu cầu từ `editReq.Reason`
                 ApplyReasonUpdatesToStudent(editReq.Student, editReq.Student.Identity, editReq.Student.Profile, editReq.Student.Contact, editReq.Reason);
+
+                // Kiểm tra tính duy nhất sau khi áp dụng Reason updates
+                if (!string.IsNullOrWhiteSpace(editReq.Student.Identity.IdNumber))
+                {
+                    if (await _context.StudentIdentities.AnyAsync(i => i.IdNumber == editReq.Student.Identity.IdNumber && i.StudentId != editReq.Student.Id))
+                        throw new InvalidOperationException($"Số căn cước công dân (CCCD) {editReq.Student.Identity.IdNumber} đã được sử dụng bởi một sinh viên khác.");
+                }
+
+                if (editReq.Student.Contact != null && !string.IsNullOrWhiteSpace(editReq.Student.Contact.PhoneNumber))
+                {
+                    if (await _context.StudentContacts.AnyAsync(c => c.PhoneNumber == editReq.Student.Contact.PhoneNumber && c.StudentId != editReq.Student.Id))
+                        throw new InvalidOperationException($"Số điện thoại {editReq.Student.Contact.PhoneNumber} đã được sử dụng bởi một sinh viên khác.");
+                }
+
+                if (editReq.Student.User != null && !string.IsNullOrWhiteSpace(editReq.Student.User.Email))
+                {
+                    if (await _context.Users.AnyAsync(u => u.Email == editReq.Student.User.Email && u.Id != editReq.Student.UserId))
+                        throw new InvalidOperationException($"Email {editReq.Student.User.Email} đã được sử dụng bởi một người khác.");
+                }
 
                 // Lưu giá trị mới
                 var newValues = new

@@ -40,6 +40,9 @@ namespace StudentAcademicManagement.Infrastructure.Services
             if (await _context.Students.AnyAsync(s => s.SchoolId == schoolId && s.StudentCode == request.StudentCode))
                 throw new InvalidOperationException($"Mã sinh viên {request.StudentCode} đã tồn tại trong trường này.");
 
+            if (!string.IsNullOrWhiteSpace(request.IdNumber) && await _context.StudentIdentities.AnyAsync(i => i.IdNumber == request.IdNumber))
+                throw new InvalidOperationException($"Căn cước công dân (CCCD) {request.IdNumber} đã tồn tại trong hệ thống.");
+
             var studentRole = await _context.Roles.FirstOrDefaultAsync(r => r.Name == "Student")
                               ?? throw new InvalidOperationException("Role Student chưa được cấu hình.");
 
@@ -73,6 +76,41 @@ namespace StudentAcademicManagement.Infrastructure.Services
                 };
 
                 _context.Students.Add(student);
+                await _context.SaveChangesAsync();
+
+                var profile = new StudentProfile
+                {
+                    StudentId = student.Id,
+                    FullName = request.FullName.Trim(),
+                    DateOfBirth = request.DateOfBirth,
+                    Gender = request.Gender,
+                    RegionType = request.RegionType,
+                    CreatedAt = DateTime.UtcNow
+                };
+                _context.StudentProfiles.Add(profile);
+
+                var identity = new StudentIdentity
+                {
+                    StudentId = student.Id,
+                    IdNumber = request.IdNumber,
+                    FullName = request.FullName.Trim(),
+                    DateOfBirth = request.DateOfBirth,
+                    Gender = request.Gender,
+                    IssueDate = request.IssueDate,
+                    IssuePlace = request.IssuePlace,
+                    VerificationStatus = "Unverified",
+                    CreatedAt = DateTime.UtcNow
+                };
+                _context.StudentIdentities.Add(identity);
+
+                var contact = new StudentContact
+                {
+                    StudentId = student.Id,
+                    Address = string.IsNullOrWhiteSpace(request.Ward) ? request.Province : $"{request.Ward}, {request.Province}".Trim(',', ' '),
+                    CreatedAt = DateTime.UtcNow
+                };
+                _context.StudentContacts.Add(contact);
+
                 await _context.SaveChangesAsync();
 
                 await transaction.CommitAsync();
@@ -156,6 +194,13 @@ namespace StudentAcademicManagement.Infrastructure.Services
                     continue;
                 }
 
+                if (!string.IsNullOrWhiteSpace(item.PhoneNumber) && await _context.StudentContacts.AnyAsync(c => c.PhoneNumber == item.PhoneNumber))
+                {
+                    result.FailureCount++;
+                    result.ErrorMessages.Add($"MSSV {code}: Số điện thoại {item.PhoneNumber} đã tồn tại trong hệ thống.");
+                    continue;
+                }
+
                 var tempPassword = GenerateRandomPassword();
 
                 try
@@ -187,6 +232,37 @@ namespace StudentAcademicManagement.Infrastructure.Services
                     };
 
                     _context.Students.Add(student);
+                    await _context.SaveChangesAsync();
+
+                    var profile = new StudentProfile
+                    {
+                        StudentId = student.Id,
+                        FullName = string.IsNullOrWhiteSpace(item.FullName) ? code : item.FullName.Trim(),
+                        DateOfBirth = item.DateOfBirth,
+                        Gender = item.Gender,
+                        PlaceOfBirth = item.PlaceOfBirth,
+                        Ethnicity = item.Ethnicity,
+                        Nationality = item.Nationality,
+                        RegionType = item.RegionType,
+                        CreatedAt = DateTime.UtcNow
+                    };
+                    _context.StudentProfiles.Add(profile);
+
+                    var contact = new StudentContact
+                    {
+                        StudentId = student.Id,
+                        PhoneNumber = item.PhoneNumber,
+                        Address = item.Address,
+                        TemporaryAddress = item.TemporaryAddress,
+                        GuardianName = item.GuardianName,
+                        GuardianPhoneNumber = item.GuardianPhoneNumber,
+                        GuardianRelationship = item.GuardianRelationship,
+                        ResidenceType = item.ResidenceType,
+                        LandlordName = item.LandlordName,
+                        LandlordPhone = item.LandlordPhone,
+                        CreatedAt = DateTime.UtcNow
+                    };
+                    _context.StudentContacts.Add(contact);
                     await _context.SaveChangesAsync();
 
                     string emailBody = $@"
