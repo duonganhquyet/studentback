@@ -13,24 +13,10 @@ var builder = WebApplication.CreateBuilder(args);
 // 1. Cấu hình CORS (Hỗ trợ linh hoạt cho cả Local Dev và Cloud Deploy trên Vercel / Render)
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowFrontend", policy =>
-    {
-        var frontendUrl = builder.Configuration["FRONTEND_URL"];
-        if (!string.IsNullOrEmpty(frontendUrl))
-        {
-            policy.WithOrigins(frontendUrl, "http://localhost:5173", "http://localhost:3000")
-                  .AllowAnyHeader()
-                  .AllowAnyMethod()
-                  .AllowCredentials();
-        }
-        else
-        {
-            policy.SetIsOriginAllowed(_ => true)
-                  .AllowAnyHeader()
-                  .AllowAnyMethod()
-                  .AllowCredentials();
-        }
-    });
+    options.AddPolicy("AllowAll",
+        policy => policy.AllowAnyOrigin()
+                        .AllowAnyMethod()
+                        .AllowAnyHeader());
 });
 
 // 2. Database
@@ -175,7 +161,7 @@ app.UseStaticFiles(new StaticFileOptions
     FileProvider = new Microsoft.Extensions.FileProviders.PhysicalFileProvider(webRootPath),
     RequestPath = ""
 });
-app.UseCors("AllowFrontend");
+app.UseCors("AllowAll");
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
